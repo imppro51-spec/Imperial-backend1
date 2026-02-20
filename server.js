@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: "*", // production me domain laga dena
+  origin: "*",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
@@ -29,12 +29,11 @@ const razorpay = new Razorpay({
 });
 
 /* =================================================
-   CREATE ORDER  (Universal Payment Handler)
+   CREATE ORDER
 ================================================= */
 
 app.post("/create-order", async (req, res) => {
   try {
-
     const {
       bookingId,
       totalAmount,
@@ -54,19 +53,19 @@ app.post("/create-order", async (req, res) => {
 
     switch (paymentType) {
 
-      case "advance": // Checkout advance
+      case "advance":
         amount = netTotal * 0.20;
         break;
 
-      case "full": // Checkout full payment
+      case "full":
         amount = netTotal;
         break;
 
-      case "mid": // MyBookings mid
+      case "mid":
         amount = netTotal * 0.30;
         break;
 
-      case "final": // MyBookings final
+      case "final":
         amount = netTotal * 0.50;
         break;
 
@@ -87,13 +86,16 @@ app.post("/create-order", async (req, res) => {
     console.log("✅ Order Created:", order.id, "Type:", paymentType);
 
     res.json({
-      order,
+      success: true,
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
       key: process.env.RAZORPAY_KEY_ID
     });
 
   } catch (err) {
     console.error("❌ Create Order Error:", err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Order creation failed" });
   }
 });
 
